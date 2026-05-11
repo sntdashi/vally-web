@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Vally Universe</string>
+    <string name="title_activity_main">Vally Universe</string>
+    <string name="package_name">com.vally.app</string>
+    <string name="custom_url_scheme">com.vally.app</string>
+</resources>

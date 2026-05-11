@@ -1,0 +1,88 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Playfair Display", ui-serif, Georgia, serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+
+  --color-romantic-blue: var(--primary, #3b82f6);
+  --color-romantic-cyan: var(--secondary, #06b6d4);
+  --color-glass-bg: rgba(255, 255, 255, 0.03);
+  --color-glass-border: rgba(255, 255, 255, 0.1);
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    @apply bg-[#010103];
+  }
+  html.dark body {
+    @apply bg-transparent text-white;
+  }
+  html:not(.dark) body {
+    @apply bg-transparent text-slate-900;
+  }
+  body {
+    @apply antialiased selection:bg-romantic-blue/30 transition-colors duration-500 bg-transparent;
+    overflow-x: hidden;
+  }
+}
+
+@layer utilities {
+  .glass {
+    background-color: rgba(255, 255, 255, var(--glass-opacity, 0.03));
+    @apply backdrop-blur-lg border border-white/5;
+  }
+  .dark .glass {
+    background-color: rgba(255, 255, 255, var(--glass-opacity, 0.03));
+    @apply border-white/5;
+  }
+  html:not(.dark) .glass {
+    background-color: rgba(255, 255, 255, calc(var(--glass-opacity, 0.03) * 8));
+    @apply border-slate-200 backdrop-blur-md;
+  }
+  
+  .glass-dark {
+    background-color: rgba(0, 0, 0, 0.3);
+    @apply backdrop-blur-xl border border-white/5;
+  }
+  html:not(.dark) .glass-dark {
+    background-color: rgba(255, 255, 255, 0.8);
+    @apply backdrop-blur-xl border-slate-200 shadow-lg;
+  }
+
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-romantic-blue via-romantic-cyan to-blue-600;
+  }
+  html:not(.dark) .text-gradient {
+    @apply from-blue-600 via-cyan-600 to-blue-800;
+  }
+
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-20px); }
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
