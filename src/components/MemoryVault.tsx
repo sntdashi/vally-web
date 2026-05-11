@@ -467,7 +467,8 @@ export default function MemoryVault() {
     const unsub = subscribeToMemories(() => {
       fetchMemories().then(setMemories);
     });
-    return unsub;
+    // Wrap in sync function — unsubscribe() returns a Promise but useEffect cleanup must be sync
+    return () => { unsub(); };
   }, []);
 
   const processFiles = React.useCallback((files: FileList | File[]) => {

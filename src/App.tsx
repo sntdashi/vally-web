@@ -6,7 +6,6 @@ import GlassCard from "./components/GlassCard";
 import { AnimatePresence } from "motion/react";
 import { PerformanceProvider } from "./hooks/usePerformance";
 import PinAuth from "./components/PinAuth";
-import PresenceIndicator from "./components/PresenceIndicator";
 const PresenceIndicatorLazy = lazy(() => import("./components/PresenceIndicator"));
 
 // Lazy load heavy components
