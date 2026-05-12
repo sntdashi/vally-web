@@ -8,6 +8,7 @@ import { PerformanceProvider } from "./hooks/usePerformance";
 import PinAuth from "./components/PinAuth";
 const PresenceIndicatorLazy = lazy(() => import("./components/PresenceIndicator"));
 const PWAInstallPrompt = lazy(() => import("./components/PWAInstallPrompt"));
+const WishlistVault = lazy(() => import("./components/WishlistVault"));
 
 // Lazy load heavy components
 const LoveTimeline = lazy(() => import("./components/LoveTimeline"));
@@ -274,6 +275,10 @@ function AppContent() {
 
       <Suspense fallback={<div className="h-[500px] flex items-center justify-center opacity-20">Loading Core...</div>}>
         <LoveCore3D />
+      </Suspense>
+
+      <Suspense fallback={<div className="h-96 flex items-center justify-center opacity-20">Loading Wishlist...</div>}>
+        <WishlistVault />
       </Suspense>
 
       <Suspense fallback={null}>
