@@ -2,6 +2,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { Heart, Stars, Calendar, Music, MessageCircleHeart, Moon, Sun, Zap, Menu, X, BatteryLow, BatteryFull } from "lucide-react";
 import { useState } from "react";
 import { usePerformance } from "../hooks/usePerformance";
+import NotificationSettings from "./NotificationSettings";
 
 interface NavbarProps {
   onThemeToggle: () => void;
@@ -170,6 +171,11 @@ export default function Navbar({ onThemeToggle, isDark }: NavbarProps) {
                         </>
                       )}
                     </button>
+                  </div>
+
+                  {/* Notification toggle */}
+                  <div className="pt-2 border-t border-white/5">
+                    <NotificationSettings />
                   </div>
 
                   <div className="flex items-center justify-between">
