@@ -7,6 +7,7 @@ import { AnimatePresence } from "motion/react";
 import { PerformanceProvider } from "./hooks/usePerformance";
 import PinAuth from "./components/PinAuth";
 const PresenceIndicatorLazy = lazy(() => import("./components/PresenceIndicator"));
+const PWAInstallPrompt = lazy(() => import("./components/PWAInstallPrompt"));
 
 // Lazy load heavy components
 const LoveTimeline = lazy(() => import("./components/LoveTimeline"));
@@ -120,6 +121,11 @@ function AppContent() {
       {/* Real-time presence indicator */}
       <Suspense fallback={null}>
         <PresenceIndicatorLazy />
+      </Suspense>
+
+      {/* PWA install prompt */}
+      <Suspense fallback={null}>
+        <PWAInstallPrompt />
       </Suspense>
       
       <Suspense fallback={null}>
