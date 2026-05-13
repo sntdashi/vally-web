@@ -4,22 +4,22 @@ import { useState, useRef, useEffect, ChangeEvent } from "react";
 
 const PLAYLIST = [
   {
-    title: "Eternal Love",
-    artist: "Our Special Track",
-    source: "https://cdn.pixabay.com/audio/2022/08/04/audio_2dde6a6107.mp3",
-    cover: "https://picsum.photos/seed/romantic/200/200"
+    title: "Clair de Lune",
+    artist: "Claude Debussy",
+    source: "https://upload.wikimedia.org/wikipedia/commons/9/96/Clair_de_lune.ogg",
+    cover: "https://picsum.photos/seed/romantic1/200/200"
   },
   {
-    title: "Midnight Serenade",
-    artist: "Acoustic Dreams",
-    source: "https://cdn.pixabay.com/audio/2022/03/23/audio_07b5825177.mp3",
-    cover: "https://picsum.photos/seed/midnight/200/200"
+    title: "Gymnopédie No.1",
+    artist: "Erik Satie",
+    source: "https://upload.wikimedia.org/wikipedia/commons/e/e9/Gymnopedie_No1.ogg",
+    cover: "https://picsum.photos/seed/romantic2/200/200"
   },
   {
-    title: "Golden Hour",
-    artist: "Sunset Vibes",
-    source: "https://cdn.pixabay.com/audio/2021/11/25/audio_91b122c05b.mp3",
-    cover: "https://picsum.photos/seed/sunset/200/200"
+    title: "Nocturne Op.9 No.2",
+    artist: "Frédéric Chopin",
+    source: "https://upload.wikimedia.org/wikipedia/commons/1/10/Chopin_Nocturne_op9_No2.ogg",
+    cover: "https://picsum.photos/seed/romantic3/200/200"
   }
 ];
 

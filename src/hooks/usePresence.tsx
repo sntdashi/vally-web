@@ -28,15 +28,9 @@ function getMyName(): string {
 async function sendPresenceNotification(name: string) {
   try {
     await supabase.functions.invoke('send-push', {
-      body: {
-        senderName: name,
-        title: `${name} is here 💙`,
-        message: `${name} just opened Vally — say hi!`,
-      },
+      body: { senderName: name, title: `${name} is here 💙`, message: `${name} just opened Vally` },
     });
-  } catch (e) {
-    console.warn('Push notify failed:', e);
-  }
+  } catch (e) { console.warn('Push notify failed:', e); }
 }
 
 export function usePresence() {
@@ -47,62 +41,63 @@ export function usePresence() {
   const notifiedRef = useRef(false);
 
   useEffect(() => {
-    const channel = supabase.channel('vally-presence', {
-      config: { presence: { key: myId.current } }
-    });
-
-    channel
+    // IMPORTANT: all .on() must be chained BEFORE .subscribe()
+    // Never add callbacks after subscribe() — causes the crash
+    const channel = supabase
+      .channel('vally-presence', { config: { presence: { key: myId.current } } })
       .on('presence', { event: 'sync' }, () => {
         const state = channel.presenceState<PresenceUser>();
         const users = Object.values(state).flat();
         setOnlineUsers(users);
-        const others = users.filter(u => u.userId !== myId.current);
-        setPartnerOnline(others.length > 0);
+        setPartnerOnline(users.some(u => u.userId !== myId.current));
       })
       .on('presence', { event: 'join' }, ({ newPresences }) => {
-        const isOther = newPresences.some((p: any) => p.userId !== myId.current);
-        if (isOther) setPartnerOnline(true);
+        if (newPresences.some((p: any) => p.userId !== myId.current)) {
+          setPartnerOnline(true);
+        }
       })
       .on('presence', { event: 'leave' }, () => {
         const state = channel.presenceState<PresenceUser>();
         const users = Object.values(state).flat();
-        const others = users.filter(u => u.userId !== myId.current);
-        setPartnerOnline(others.length > 0);
+        setPartnerOnline(users.some(u => u.userId !== myId.current));
       })
       .subscribe(async (status) => {
-        if (status === 'SUBSCRIBED') {
-          const myName = getMyName();
+        if (status !== 'SUBSCRIBED') return;
+        const myName = getMyName();
+        try {
           await channel.track({
             userId: myId.current,
             name: myName,
             lastSeen: new Date().toISOString(),
             page: 'home',
           });
-          if (!notifiedRef.current) {
-            notifiedRef.current = true;
-            // Only notify once per session (not every re-mount)
-            const sessionKey = 'vally_notified_' + new Date().toDateString();
-            if (!sessionStorage.getItem(sessionKey)) {
-              sessionStorage.setItem(sessionKey, '1');
-              await sendPresenceNotification(myName);
-            }
+        } catch (e) { console.warn('Presence track failed:', e); }
+
+        // Notify partner once per day
+        if (!notifiedRef.current) {
+          notifiedRef.current = true;
+          const sessionKey = 'vally_notified_' + new Date().toDateString();
+          if (!sessionStorage.getItem(sessionKey)) {
+            sessionStorage.setItem(sessionKey, '1');
+            await sendPresenceNotification(myName);
           }
         }
       });
 
     channelRef.current = channel;
-    return () => { channel.unsubscribe(); };
+    return () => { supabase.removeChannel(channel); };
   }, []);
 
   const updatePage = async (page: string) => {
-    if (channelRef.current) {
+    if (!channelRef.current) return;
+    try {
       await channelRef.current.track({
         userId: myId.current,
         name: getMyName(),
         lastSeen: new Date().toISOString(),
         page,
       });
-    }
+    } catch (e) { console.warn('updatePage failed:', e); }
   };
 
   return { onlineUsers, partnerOnline, updatePage };
