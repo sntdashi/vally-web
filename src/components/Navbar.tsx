@@ -3,6 +3,7 @@ import { Heart, Stars, Calendar, Music, MessageCircleHeart, Moon, Sun, Zap, Menu
 import { useState } from "react";
 import { usePerformance } from "../hooks/usePerformance";
 import NotificationSettings from "./NotificationSettings";
+import { PresencePill } from "./PresenceIndicator";
 
 interface NavbarProps {
   onThemeToggle: () => void;
@@ -26,7 +27,7 @@ export default function Navbar({ onThemeToggle, isDark }: NavbarProps) {
     <motion.nav
       initial={{ y: -100 }}
       animate={{ y: 0 }}
-      className="fixed top-4 left-0 right-0 md:left-6 md:right-auto md:top-6 z-50 flex justify-center md:justify-start px-4 md:px-0"
+      className="fixed top-0 left-0 right-0 z-50 px-4 pt-3 pb-2 md:px-6 md:pt-4 flex items-center justify-between gap-3"
     >
       <div className="flex flex-col md:flex-row items-center gap-3 w-full max-w-md md:max-w-none">
         {/* Main Bar */}
