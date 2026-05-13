@@ -39,17 +39,31 @@ export default function MusicPlayer() {
   const [visualizerData, setVisualizerData] = useState<number[]>(new Array(8).fill(0));
   const currentTrack = PLAYLIST[currentTrackIndex];
 
-  useEffect(() => {
+  const audioContextRef = useRef<AudioContext | null>(null);
+
+  // Init AudioContext on first user gesture (required by mobile browsers)
+  const initAudioContext = () => {
     if (audioRef.current && !analyserRef.current) {
-      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-      const analyser = audioContext.createAnalyser();
-      const source = audioContext.createMediaElementSource(audioRef.current);
-      source.connect(analyser);
-      analyser.connect(audioContext.destination);
-      analyser.fftSize = 64;
-      analyserRef.current = analyser;
+      try {
+        const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+        if (!AudioCtx) return;
+        const audioContext = new AudioCtx();
+        audioContextRef.current = audioContext;
+        const analyser = audioContext.createAnalyser();
+        const source = audioContext.createMediaElementSource(audioRef.current);
+        source.connect(analyser);
+        analyser.connect(audioContext.destination);
+        analyser.fftSize = 64;
+        analyserRef.current = analyser;
+        // Resume if suspended (mobile autoplay policy)
+        if (audioContext.state === 'suspended') audioContext.resume();
+      } catch (e) {
+        console.warn('AudioContext init failed:', e);
+      }
+    } else if (audioContextRef.current?.state === 'suspended') {
+      audioContextRef.current.resume();
     }
-  }, []);
+  };
 
   useEffect(() => {
     if (isPlaying) {
@@ -87,6 +101,7 @@ export default function MusicPlayer() {
 
   const togglePlay = () => {
     if (audioRef.current) {
+      initAudioContext();
       if (isPlaying) {
         audioRef.current.pause();
       } else {

@@ -29,9 +29,10 @@ export default function Navbar({ onThemeToggle, isDark }: NavbarProps) {
       animate={{ y: 0 }}
       className="fixed top-0 left-0 right-0 z-50 px-4 pt-3 pb-2 md:px-6 md:pt-4 flex items-center justify-between gap-3"
     >
-      <div className="flex flex-col md:flex-row items-center gap-3 w-full max-w-md md:max-w-none">
-        {/* Main Bar */}
-        <div className="flex items-center gap-2 md:gap-3 w-full md:w-auto">
+      <div className="flex items-center gap-2 w-full">
+        {/* Logo / Menu trigger — left */}
+        <div className="flex items-center gap-2 md:gap-3 flex-1">
+          <div className="flex items-center gap-2 md:gap-3 w-full md:w-auto">
           {/* Logo / Trigger */}
           <motion.button
             onClick={() => setIsOpen(!isOpen)}
@@ -202,6 +203,12 @@ export default function Navbar({ onThemeToggle, isDark }: NavbarProps) {
               </motion.div>
             )}
           </AnimatePresence>
+        </div>
+        </div>
+
+        {/* Presence pill — always visible, right side */}
+        <div className="flex-shrink-0">
+          <PresencePill />
         </div>
       </div>
     </motion.nav>

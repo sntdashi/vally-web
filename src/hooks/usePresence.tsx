@@ -80,7 +80,12 @@ export function usePresence() {
           });
           if (!notifiedRef.current) {
             notifiedRef.current = true;
-            await sendPresenceNotification(myName);
+            // Only notify once per session (not every re-mount)
+            const sessionKey = 'vally_notified_' + new Date().toDateString();
+            if (!sessionStorage.getItem(sessionKey)) {
+              sessionStorage.setItem(sessionKey, '1');
+              await sendPresenceNotification(myName);
+            }
           }
         }
       });
