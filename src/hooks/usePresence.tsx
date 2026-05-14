@@ -1,6 +1,5 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, createContext, useContext, ReactNode } from 'react';
 import { supabase } from '../lib/supabase';
-import { RealtimeChannel } from '@supabase/supabase-js';
 
 export interface PresenceUser {
   userId: string;
@@ -8,6 +7,18 @@ export interface PresenceUser {
   lastSeen: string;
   page: string;
 }
+
+interface PresenceContextType {
+  onlineUsers: PresenceUser[];
+  partnerOnline: boolean;
+  updatePage: (page: string) => void;
+}
+
+const PresenceContext = createContext<PresenceContextType>({
+  onlineUsers: [],
+  partnerOnline: false,
+  updatePage: () => {},
+});
 
 function getOrCreateUserId(): string {
   let id = localStorage.getItem('vally_user_id');
@@ -33,16 +44,25 @@ async function sendPresenceNotification(name: string) {
   } catch (e) { console.warn('Push notify failed:', e); }
 }
 
-export function usePresence() {
+// Single provider at app root — only ONE channel ever created
+export function PresenceProvider({ children }: { children: ReactNode }) {
   const [onlineUsers, setOnlineUsers] = useState<PresenceUser[]>([]);
   const [partnerOnline, setPartnerOnline] = useState(false);
-  const channelRef = useRef<RealtimeChannel | null>(null);
+  const channelRef = useRef<any>(null);
   const myId = useRef(getOrCreateUserId());
   const notifiedRef = useRef(false);
 
+  const updatePage = (page: string) => {
+    if (!channelRef.current) return;
+    channelRef.current.track({
+      userId: myId.current,
+      name: getMyName(),
+      lastSeen: new Date().toISOString(),
+      page,
+    }).catch(() => {});
+  };
+
   useEffect(() => {
-    // IMPORTANT: all .on() must be chained BEFORE .subscribe()
-    // Never add callbacks after subscribe() — causes the crash
     const channel = supabase
       .channel('vally-presence', { config: { presence: { key: myId.current } } })
       .on('presence', { event: 'sync' }, () => {
@@ -52,7 +72,7 @@ export function usePresence() {
         setPartnerOnline(users.some(u => u.userId !== myId.current));
       })
       .on('presence', { event: 'join' }, ({ newPresences }) => {
-        if (newPresences.some((p: any) => p.userId !== myId.current)) {
+        if ((newPresences as any[]).some((p) => p.userId !== myId.current)) {
           setPartnerOnline(true);
         }
       })
@@ -71,14 +91,13 @@ export function usePresence() {
             lastSeen: new Date().toISOString(),
             page: 'home',
           });
-        } catch (e) { console.warn('Presence track failed:', e); }
+        } catch (e) { console.warn('track failed:', e); }
 
-        // Notify partner once per day
         if (!notifiedRef.current) {
           notifiedRef.current = true;
-          const sessionKey = 'vally_notified_' + new Date().toDateString();
-          if (!sessionStorage.getItem(sessionKey)) {
-            sessionStorage.setItem(sessionKey, '1');
+          const key = 'vally_notified_' + new Date().toDateString();
+          if (!sessionStorage.getItem(key)) {
+            sessionStorage.setItem(key, '1');
             await sendPresenceNotification(myName);
           }
         }
@@ -88,17 +107,14 @@ export function usePresence() {
     return () => { supabase.removeChannel(channel); };
   }, []);
 
-  const updatePage = async (page: string) => {
-    if (!channelRef.current) return;
-    try {
-      await channelRef.current.track({
-        userId: myId.current,
-        name: getMyName(),
-        lastSeen: new Date().toISOString(),
-        page,
-      });
-    } catch (e) { console.warn('updatePage failed:', e); }
-  };
+  return (
+    <PresenceContext.Provider value={{ onlineUsers, partnerOnline, updatePage }}>
+      {children}
+    </PresenceContext.Provider>
+  );
+}
 
-  return { onlineUsers, partnerOnline, updatePage };
+// All components call this — no duplicate channels
+export function usePresence() {
+  return useContext(PresenceContext);
 }

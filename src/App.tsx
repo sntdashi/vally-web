@@ -6,6 +6,7 @@ import GlassCard from "./components/GlassCard";
 import { AnimatePresence } from "motion/react";
 import { PerformanceProvider } from "./hooks/usePerformance";
 import PinAuth from "./components/PinAuth";
+import { PresenceProvider } from "./hooks/usePresence";
 const PresenceIndicatorLazy = lazy(() => import("./components/PresenceIndicator"));
 const PWAInstallPrompt = lazy(() => import("./components/PWAInstallPrompt"));
 const WishlistVault = lazy(() => import("./components/WishlistVault"));
@@ -85,7 +86,9 @@ export default function App() {
   return (
     <PinAuth>
       <PerformanceProvider>
-        <AppContent />
+        <PresenceProvider>
+          <AppContent />
+        </PresenceProvider>
       </PerformanceProvider>
     </PinAuth>
   );
