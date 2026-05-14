@@ -6,19 +6,19 @@ const PLAYLIST = [
   {
     title: "Clair de Lune",
     artist: "Claude Debussy",
-    source: "https://upload.wikimedia.org/wikipedia/commons/9/96/Clair_de_lune.ogg",
+    source: "https://upload.wikimedia.org/wikipedia/commons/transcoded/9/96/Clair_de_lune.ogg/Clair_de_lune.ogg.mp3",
     cover: "https://picsum.photos/seed/romantic1/200/200"
   },
   {
     title: "Gymnopédie No.1",
     artist: "Erik Satie",
-    source: "https://upload.wikimedia.org/wikipedia/commons/e/e9/Gymnopedie_No1.ogg",
+    source: "https://upload.wikimedia.org/wikipedia/commons/transcoded/e/e9/Gymnopedie_No1.ogg/Gymnopedie_No1.ogg.mp3",
     cover: "https://picsum.photos/seed/romantic2/200/200"
   },
   {
     title: "Nocturne Op.9 No.2",
     artist: "Frédéric Chopin",
-    source: "https://upload.wikimedia.org/wikipedia/commons/1/10/Chopin_Nocturne_op9_No2.ogg",
+    source: "https://upload.wikimedia.org/wikipedia/commons/transcoded/1/10/Chopin_Nocturne_op9_No2.ogg/Chopin_Nocturne_op9_No2.ogg.mp3",
     cover: "https://picsum.photos/seed/romantic3/200/200"
   }
 ];
@@ -166,6 +166,8 @@ export default function MusicPlayer() {
       <audio
         ref={audioRef}
         src={currentTrack.source}
+        crossOrigin="anonymous"
+        preload="metadata"
         onTimeUpdate={handleTimeUpdate}
         onLoadedMetadata={handleLoadedMetadata}
         onEnded={handleNext}
