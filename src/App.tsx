@@ -4,7 +4,7 @@ import { Heart, ChevronDown, Sparkles, ShieldCheck, Globe, Zap, Moon, Sun, X } f
 import Navbar from "./components/Navbar";
 import GlassCard from "./components/GlassCard";
 import { AnimatePresence } from "motion/react";
-import { PerformanceProvider } from "./hooks/usePerformance";
+import { PerformanceProvider, usePerformance } from "./hooks/usePerformance";
 import PinAuth from "./components/PinAuth";
 import { PresenceProvider } from "./hooks/usePresence";
 const PresenceIndicatorLazy = lazy(() => import("./components/PresenceIndicator"));
@@ -98,6 +98,7 @@ function AppContent() {
   const [isDark, setIsDark] = useState(true);
   const [showDocs, setShowDocs] = useState(false);
   const containerRef = useRef(null);
+  const { isMobile, disable3D } = usePerformance();
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ["start start", "end end"]
@@ -138,9 +139,9 @@ function AppContent() {
 
       {/* Hero Section */}
       <section id="home" className="relative h-screen flex items-center justify-center overflow-hidden bg-transparent">
-        {/* 3D Background */}
+          {/* 3D Background - only on desktop to avoid WebGL context limit */}
         <Suspense fallback={<div className="absolute inset-0 bg-transparent" />}>
-          <Hero3D />
+          {!isMobile && !disable3D && <Hero3D />}
         </Suspense>
 
         <motion.div
