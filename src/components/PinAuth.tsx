@@ -1,22 +1,22 @@
 import { motion, AnimatePresence } from "motion/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Heart, Delete } from "lucide-react";
 
 const DEFAULT_PIN = import.meta.env.VITE_PIN || "0612";
 const SESSION_KEY = "vally_auth_session";
-const SESSION_DURATION = 7 * 24 * 60 * 60 * 1000;
+const INACTIVITY_LIMIT = 5 * 60 * 1000; // 5 minutes
 
 function isSessionValid(): boolean {
   try {
     const stored = localStorage.getItem(SESSION_KEY);
     if (!stored) return false;
-    const { expiry } = JSON.parse(stored);
-    return Date.now() < expiry;
+    const { lastActive } = JSON.parse(stored);
+    return Date.now() - lastActive < INACTIVITY_LIMIT;
   } catch { return false; }
 }
 
-function setSession() {
-  localStorage.setItem(SESSION_KEY, JSON.stringify({ expiry: Date.now() + SESSION_DURATION }));
+function touchSession() {
+  localStorage.setItem(SESSION_KEY, JSON.stringify({ lastActive: Date.now() }));
 }
 
 export function clearSession() {
@@ -30,6 +30,25 @@ export default function PinAuth({ children }: { children: React.ReactNode }) {
   const [shaking, setShaking] = useState(false);
   const [success, setSuccess] = useState(false);
 
+  // Touch session on any user activity
+  useEffect(() => {
+    if (!authenticated) return;
+    touchSession();
+    const events = ['click', 'scroll', 'keydown', 'touchstart'];
+    const handler = () => touchSession();
+    events.forEach(e => window.addEventListener(e, handler, { passive: true }));
+
+    // Check every 30s if session expired
+    const interval = setInterval(() => {
+      if (!isSessionValid()) setAuthenticated(false);
+    }, 30_000);
+
+    return () => {
+      events.forEach(e => window.removeEventListener(e, handler));
+      clearInterval(interval);
+    };
+  }, [authenticated]);
+
   const handleDigit = (digit: string) => {
     if (pin.length >= 6) return;
     const newPin = pin + digit;
@@ -39,7 +58,7 @@ export default function PinAuth({ children }: { children: React.ReactNode }) {
     if (newPin.length >= DEFAULT_PIN.length) {
       if (newPin === DEFAULT_PIN) {
         setSuccess(true);
-        setTimeout(() => { setSession(); setAuthenticated(true); }, 600);
+        setTimeout(() => { touchSession(); setAuthenticated(true); }, 600);
       } else {
         setShaking(true);
         setError(true);

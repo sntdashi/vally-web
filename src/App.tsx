@@ -99,6 +99,7 @@ function AppContent() {
   const [showDocs, setShowDocs] = useState(false);
   const containerRef = useRef(null);
   const { isMobile, disable3D } = usePerformance();
+  const { updatePage } = usePresence();
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ["start start", "end end"]
@@ -114,6 +115,25 @@ function AppContent() {
 
   const heroOpacity = useTransform(scrollYProgress, [0, 0.2], [1, 0]);
   const heroScale = useTransform(scrollYProgress, [0, 0.2], [1, 0.9]);
+
+  // Track which section user is viewing — updates partner's presence indicator
+  useEffect(() => {
+    const sections = ['home', 'stats', 'timeline', 'memories', 'spotify', 'ai', 'wishlist', 'core'];
+    const observers: IntersectionObserver[] = [];
+
+    sections.forEach(id => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const obs = new IntersectionObserver(
+        ([entry]) => { if (entry.isIntersecting) updatePage(id); },
+        { threshold: 0.4 }
+      );
+      obs.observe(el);
+      observers.push(obs);
+    });
+
+    return () => observers.forEach(o => o.disconnect());
+  }, []);
 
   return (
     <main ref={containerRef} className="relative min-h-screen selection:bg-romantic-blue/30 overflow-x-hidden">

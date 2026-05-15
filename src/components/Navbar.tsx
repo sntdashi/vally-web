@@ -205,11 +205,11 @@ export default function Navbar({ onThemeToggle, isDark }: NavbarProps) {
           </AnimatePresence>
         </div>
         </div>
+      </div>
 
-        {/* Presence pill — always visible, right side */}
-        <div className="flex-shrink-0">
-          <PresencePill />
-        </div>
+      {/* Presence pill — floating bottom center, never overlaps navbar */}
+      <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[80] pointer-events-none">
+        <PresencePill />
       </div>
     </motion.nav>
   );

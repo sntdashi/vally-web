@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from 'motion/react';
 import { usePresence } from '../hooks/usePresence';
-import { Heart } from 'lucide-react';
+import { Heart, Eye } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
 function getPartnerName(): string {
@@ -10,32 +10,56 @@ function getPartnerName(): string {
   } catch { return 'Your love'; }
 }
 
-// Exported so Navbar can embed this inline instead of floating
+const PAGE_LABELS: Record<string, string> = {
+  home: 'Home 🏠',
+  timeline: 'Timeline 💌',
+  memories: 'Gallery 📸',
+  stats: 'Stats 📊',
+  spotify: 'Playlist 🎵',
+  ai: 'AI Letters ✨',
+  wishlist: 'Wishlist ⭐',
+  core: 'Moon 🌙',
+};
+
+// Inline pill for Navbar — compact, no floating
 export function PresencePill() {
   const { partnerOnline, onlineUsers } = usePresence();
   const [partnerName] = useState(getPartnerName);
-  const partner = onlineUsers.find(u => u.userId !== localStorage.getItem('vally_user_id'));
+  const myId = localStorage.getItem('vally_user_id') || '';
+  const partner = onlineUsers.find(u => u.userId !== myId);
+  const pageLabel = partner?.page ? (PAGE_LABELS[partner.page] || partner.page) : null;
 
   return (
-    <div className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-full transition-all duration-500 ${
-      partnerOnline ? 'bg-green-500/10 border border-green-400/20' : 'bg-white/5 border border-white/10'
-    }`}>
+    <motion.div
+      animate={{ opacity: 1 }}
+      className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[10px] font-mono uppercase tracking-wide transition-all duration-500 ${
+        partnerOnline
+          ? 'bg-green-500/10 border border-green-400/20 text-green-300'
+          : 'bg-white/5 border border-white/10 opacity-50'
+      }`}
+    >
       <div className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${
-        partnerOnline ? 'bg-green-400 animate-pulse shadow-[0_0_6px_rgba(74,222,128,0.8)]' : 'bg-white/20'
+        partnerOnline
+          ? 'bg-green-400 animate-pulse shadow-[0_0_5px_rgba(74,222,128,0.8)]'
+          : 'bg-white/30'
       }`} />
-      <span className="text-[9px] font-mono uppercase tracking-wider opacity-70 whitespace-nowrap">
-        {partnerOnline ? partnerName : 'Offline'}
+      <span className="whitespace-nowrap">
+        {partnerOnline
+          ? pageLabel ? `${partnerName} · ${pageLabel}` : partnerName
+          : 'Offline'}
       </span>
-    </div>
+    </motion.div>
   );
 }
 
-// Toast only — no floating pill (pill is now inside Navbar)
+// Toast only — shown when partner comes online
 export default function PresenceIndicator() {
-  const { partnerOnline } = usePresence();
+  const { partnerOnline, onlineUsers } = usePresence();
   const [partnerName] = useState(getPartnerName);
   const [showToast, setShowToast] = useState(false);
   const [prevOnline, setPrevOnline] = useState(false);
+  const myId = localStorage.getItem('vally_user_id') || '';
+  const partner = onlineUsers.find(u => u.userId !== myId);
 
   useEffect(() => {
     if (partnerOnline && !prevOnline) {
@@ -52,7 +76,7 @@ export default function PresenceIndicator() {
           initial={{ opacity: 0, y: 60, scale: 0.9 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 60, scale: 0.9 }}
-          className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[100]"
+          className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[100]"
         >
           <div className="glass px-5 py-3 rounded-2xl border border-green-400/20 shadow-2xl flex items-center gap-3 whitespace-nowrap">
             <motion.div animate={{ scale: [1, 1.3, 1] }} transition={{ duration: 0.6, repeat: 2 }}>
