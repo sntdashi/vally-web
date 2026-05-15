@@ -6,7 +6,7 @@ import GlassCard from "./components/GlassCard";
 import { AnimatePresence } from "motion/react";
 import { PerformanceProvider, usePerformance } from "./hooks/usePerformance";
 import PinAuth from "./components/PinAuth";
-import { PresenceProvider } from "./hooks/usePresence";
+import { PresenceProvider, usePresence } from "./hooks/usePresence";
 const PresenceIndicatorLazy = lazy(() => import("./components/PresenceIndicator"));
 const PWAInstallPrompt = lazy(() => import("./components/PWAInstallPrompt"));
 const WishlistVault = lazy(() => import("./components/WishlistVault"));
