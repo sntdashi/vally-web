@@ -5,44 +5,28 @@
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-serif: "Playfair Display", ui-serif, Georgia, serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
-
   --color-romantic-blue: var(--primary, #3b82f6);
   --color-romantic-cyan: var(--secondary, #06b6d4);
 }
 
 @layer base {
-  html {
-    scroll-behavior: smooth;
-  }
-  html.dark {
-    background-color: #010103;
-    color-scheme: dark;
-  }
-  html:not(.dark) {
-    background-color: #f0f4ff;
-    color-scheme: light;
-  }
-  html.dark body {
-    @apply text-white;
-  }
-  html:not(.dark) body {
-    @apply text-slate-900;
-  }
+  html { scroll-behavior: smooth; }
+
+  /* Both modes keep dark background — GlobalBackground handles it */
+  html.dark { background-color: #010103; color-scheme: dark; }
+  html:not(.dark) { background-color: #010103; color-scheme: dark; }
+
   body {
-    @apply antialiased;
+    @apply text-white antialiased;
     overflow-x: hidden;
-    transition: background-color 0.5s ease, color 0.5s ease;
+    transition: background-color 0.5s ease;
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
   }
 }
 
 @layer utilities {
   /* ── DARK MODE glass ── */
-  .dark .glass {
-    background-color: rgba(255, 255, 255, 0.04);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-  }
   .glass {
     background-color: rgba(255, 255, 255, 0.04);
     backdrop-filter: blur(16px);
@@ -50,47 +34,30 @@
     border: 1px solid rgba(255, 255, 255, 0.08);
   }
 
-  /* ── LIGHT MODE glass ── */
-  html:not(.dark) .glass {
-    background-color: rgba(255, 255, 255, 0.75);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(100, 120, 200, 0.15);
-    box-shadow: 0 2px 20px rgba(59, 130, 246, 0.06);
-  }
-
-  /* ── DARK MODE glass-dark ── */
-  .dark .glass-dark, .glass-dark {
+  .glass-dark {
     background-color: rgba(0, 0, 0, 0.35);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border: 1px solid rgba(255, 255, 255, 0.06);
   }
 
-  /* ── LIGHT MODE glass-dark ── */
+  /* ── LIGHT MODE — keep glass transparent, just slightly brighter ── */
+  html:not(.dark) .glass {
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
   html:not(.dark) .glass-dark {
-    background-color: rgba(255, 255, 255, 0.9);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(100, 120, 200, 0.2);
-    box-shadow: 0 4px 30px rgba(59, 130, 246, 0.08);
+    background-color: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.15);
   }
 
   /* ── TEXT gradient ── */
-  .dark .text-gradient, .text-gradient {
+  .text-gradient {
     @apply bg-clip-text text-transparent bg-gradient-to-r from-romantic-blue via-romantic-cyan to-blue-600;
   }
-  html:not(.dark) .text-gradient {
-    @apply from-blue-600 via-cyan-500 to-indigo-600;
-  }
 
-  /* ── Opacity overrides for light mode readability ── */
-  html:not(.dark) .opacity-60 { opacity: 0.7; }
-  html:not(.dark) .opacity-50 { opacity: 0.65; }
-  html:not(.dark) .opacity-40 { opacity: 0.55; }
-  html:not(.dark) .opacity-30 { opacity: 0.45; }
-  html:not(.dark) .opacity-20 { opacity: 0.35; }
-
+  /* ── Float animation ── */
   .animate-float {
     animation: float 6s ease-in-out infinite;
   }
@@ -99,19 +66,13 @@
     50% { transform: translateY(-20px); }
   }
 
-  /* Hide scrollbar on filter rows */
+  /* Hide scrollbar */
   .scrollbar-none::-webkit-scrollbar { display: none; }
   .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
 }
 
-/* Custom Scrollbar — dark only */
-.dark ::-webkit-scrollbar { width: 5px; }
-.dark ::-webkit-scrollbar-track { background: transparent; }
-.dark ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
-.dark ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
-
-/* Safe area for PWA on iPhone */
-body {
-  padding-top: env(safe-area-inset-top);
-  padding-bottom: env(safe-area-inset-bottom);
-}
+/* Custom scrollbar */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }

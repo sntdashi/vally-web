@@ -1123,86 +1123,46 @@ export default function GlobalBackground() {
   const [isDark, setIsDark] = useState(true);
   const [isDay, setIsDay] = useState(true);
   const [showOrbits, setShowOrbits] = useState(false);
-  const [timeSpeed, setTimeSpeed] = useState(1); // 1 = Real-time
+  const [timeSpeed, setTimeSpeed] = useState(1);
   const [showSettings, setShowSettings] = useState(false);
   const [selectedPlanet, setSelectedPlanet] = useState<PlanetData | null>(null);
   const [hoveredPlanet, setHoveredPlanet] = useState<PlanetData | null>(null);
   const { primary } = useThemeColors();
   const { postProcessing, pixelRatio, disable3D, manualLowPower } = usePerformance();
 
-  // CSS-only fallback for low-end / 3D-disabled devices
-  if (disable3D || manualLowPower) {
-    return (
-      <div
-        className="fixed inset-0 z-[-1] pointer-events-none transition-colors duration-1000 overflow-hidden"
-        style={{ backgroundColor: '#010103' }}
-      >
-        {/* Animated gradient orbs - pure CSS, zero GPU overhead */}
-        <div className="absolute inset-0">
-          <div
-            className="absolute w-[600px] h-[600px] rounded-full opacity-20 blur-[120px] animate-pulse"
-            style={{
-              background: 'radial-gradient(circle, #3b82f6, transparent)',
-              top: '10%', left: '20%',
-              animationDuration: '4s',
-            }}
-          />
-          <div
-            className="absolute w-[400px] h-[400px] rounded-full opacity-15 blur-[100px]"
-            style={{
-              background: 'radial-gradient(circle, #06b6d4, transparent)',
-              bottom: '20%', right: '15%',
-              animation: 'pulse 6s ease-in-out infinite',
-            }}
-          />
-          <div
-            className="absolute w-[300px] h-[300px] rounded-full opacity-10 blur-[80px]"
-            style={{
-              background: 'radial-gradient(circle, #8b5cf6, transparent)',
-              top: '50%', left: '50%',
-              animation: 'pulse 8s ease-in-out infinite',
-            }}
-          />
-        </div>
-        {/* Static star dots - no WebGL */}
-        <div className="absolute inset-0" style={{
-          backgroundImage: `
-            radial-gradient(1px 1px at 10% 20%, rgba(255,255,255,0.4) 0%, transparent 100%),
-            radial-gradient(1px 1px at 30% 60%, rgba(255,255,255,0.3) 0%, transparent 100%),
-            radial-gradient(1px 1px at 50% 10%, rgba(255,255,255,0.5) 0%, transparent 100%),
-            radial-gradient(1px 1px at 70% 40%, rgba(255,255,255,0.3) 0%, transparent 100%),
-            radial-gradient(1px 1px at 85% 70%, rgba(255,255,255,0.4) 0%, transparent 100%),
-            radial-gradient(1px 1px at 20% 80%, rgba(255,255,255,0.3) 0%, transparent 100%),
-            radial-gradient(1px 1px at 60% 90%, rgba(255,255,255,0.2) 0%, transparent 100%),
-            radial-gradient(1px 1px at 90% 15%, rgba(255,255,255,0.5) 0%, transparent 100%),
-            radial-gradient(1px 1px at 45% 55%, rgba(255,255,255,0.3) 0%, transparent 100%),
-            radial-gradient(1px 1px at 15% 45%, rgba(255,255,255,0.4) 0%, transparent 100%)
-          `
-        }} />
-        {/* Vignette */}
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.5)_100%)]" />
-      </div>
-    );
-  }
-
+  // ALL hooks must run before any conditional return
   useEffect(() => {
     const checkDark = () => {
       const dark = document.documentElement.classList.contains('dark');
       setIsDark(dark);
-      setIsDay(!dark); // Override time-based: Light mode = Day, Dark mode = Night
+      setIsDay(!dark);
     };
-
     checkDark();
-    
     const observer = new MutationObserver(checkDark);
     observer.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
-    
-    return () => {
-      observer.disconnect();
-    };
+    return () => { observer.disconnect(); };
   }, []);
 
   const activePlanet = selectedPlanet || hoveredPlanet;
+
+  // CSS-only fallback — no WebGL, no hooks violations
+  if (disable3D || manualLowPower) {
+    return (
+      <div className="fixed inset-0 z-[-1] pointer-events-none overflow-hidden"
+        style={{ backgroundColor: '#010103' }}>
+        <div className="absolute inset-0">
+          <div className="absolute w-[600px] h-[600px] rounded-full opacity-20 blur-[120px] animate-pulse"
+            style={{ background: 'radial-gradient(circle, #3b82f6, transparent)', top: '10%', left: '20%', animationDuration: '4s' }} />
+          <div className="absolute w-[400px] h-[400px] rounded-full opacity-15 blur-[100px]"
+            style={{ background: 'radial-gradient(circle, #06b6d4, transparent)', bottom: '20%', right: '15%', animation: 'pulse 6s ease-in-out infinite' }} />
+          <div className="absolute w-[300px] h-[300px] rounded-full opacity-10 blur-[80px]"
+            style={{ background: 'radial-gradient(circle, #8b5cf6, transparent)', top: '50%', left: '50%', animation: 'pulse 8s ease-in-out infinite' }} />
+        </div>
+        <div className="absolute inset-0" style={{ backgroundImage: `radial-gradient(1px 1px at 10% 20%, rgba(255,255,255,0.4) 0%, transparent 100%), radial-gradient(1px 1px at 30% 60%, rgba(255,255,255,0.3) 0%, transparent 100%), radial-gradient(1px 1px at 70% 40%, rgba(255,255,255,0.3) 0%, transparent 100%), radial-gradient(1px 1px at 85% 70%, rgba(255,255,255,0.4) 0%, transparent 100%), radial-gradient(1px 1px at 90% 15%, rgba(255,255,255,0.5) 0%, transparent 100%)` }} />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.5)_100%)]" />
+      </div>
+    );
+  }
 
   return (
     <>
