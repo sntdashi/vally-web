@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "motion/react";
-import { Play, Pause, SkipForward, SkipBack, Volume2, Volume1, VolumeX, Music, ChevronDown, ChevronUp } from "lucide-react";
+import { Play, Pause, SkipForward, SkipBack, Volume2, Volume1, VolumeX, Music, ChevronDown, ChevronUp, Plus, X } from "lucide-react";
 import { useState, useRef, useEffect, ChangeEvent } from "react";
 
 const PLAYLIST = [
@@ -23,6 +23,40 @@ const PLAYLIST = [
   }
 ];
 
+const isMobileDevice = () =>
+  window.innerWidth < 768 || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+// Persist custom playlist to localStorage
+function loadCustomPlaylist() {
+  try {
+    const saved = localStorage.getItem('vally_playlist');
+    return saved ? JSON.parse(saved) : [];
+  } catch { return []; }
+}
+
+function saveCustomPlaylist(tracks: typeof PLAYLIST) {
+  localStorage.setItem('vally_playlist', JSON.stringify(tracks));
+}
+
+// Extract direct audio URL from various sources
+async function resolveAudioUrl(url: string): Promise<{ src: string; title: string; artist: string }> {
+  // Direct audio file
+  if (/\.(mp3|ogg|wav|flac|aac|m4a)(\?.*)?$/i.test(url)) {
+    const filename = url.split('/').pop()?.split('?')[0] || 'Unknown';
+    return { src: url, title: filename.replace(/\.[^.]+$/, ''), artist: 'Custom' };
+  }
+  // Spotify — can't stream directly, just store as reference
+  if (url.includes('spotify.com')) {
+    return { src: '', title: 'Spotify Track (opens in app)', artist: 'Spotify' };
+  }
+  // YouTube — can't stream directly
+  if (url.includes('youtube.com') || url.includes('youtu.be')) {
+    return { src: '', title: 'YouTube Track (not streamable)', artist: 'YouTube' };
+  }
+  // Treat as direct URL
+  return { src: url, title: url.split('/').pop() || 'Track', artist: 'Custom' };
+}
+
 export default function MusicPlayer() {
   const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -31,15 +65,49 @@ export default function MusicPlayer() {
   const [isMuted, setIsMuted] = useState(false);
   const [duration, setDuration] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
-  const [isMinimized, setIsMinimized] = useState(false);
-  
+  // Start minimized on mobile, expanded on desktop
+  const [isMinimized, setIsMinimized] = useState(() => isMobileDevice());
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [addUrl, setAddUrl] = useState('');
+  const [addLoading, setAddLoading] = useState(false);
+  const [customTracks, setCustomTracks] = useState<typeof PLAYLIST>(() => loadCustomPlaylist());
+
+  const allTracks = [...PLAYLIST, ...customTracks];
+
   const audioRef = useRef<HTMLAudioElement>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const animationRef = useRef<number | null>(null);
   const [visualizerData, setVisualizerData] = useState<number[]>(new Array(8).fill(0));
-  const currentTrack = PLAYLIST[currentTrackIndex];
+  const currentTrack = allTracks[currentTrackIndex] || PLAYLIST[0];
 
   const audioContextRef = useRef<AudioContext | null>(null);
+
+  const handleAddTrack = async () => {
+    if (!addUrl.trim()) return;
+    setAddLoading(true);
+    const { src, title, artist } = await resolveAudioUrl(addUrl.trim());
+    if (!src) {
+      alert('Maaf, link ini tidak bisa di-stream langsung. Coba link direct audio (.mp3, .ogg, dll)');
+      setAddLoading(false);
+      return;
+    }
+    const newTrack = { title, artist, source: src, cover: `https://picsum.photos/seed/${Date.now()}/200/200` };
+    const updated = [...customTracks, newTrack];
+    setCustomTracks(updated);
+    saveCustomPlaylist(updated);
+    setAddUrl('');
+    setShowAddForm(false);
+    setAddLoading(false);
+    // Auto-switch to new track
+    setCurrentTrackIndex(allTracks.length);
+  };
+
+  const handleRemoveCustomTrack = (idx: number) => {
+    const updated = customTracks.filter((_, i) => i !== idx);
+    setCustomTracks(updated);
+    saveCustomPlaylist(updated);
+    if (currentTrackIndex >= PLAYLIST.length + idx) setCurrentTrackIndex(0);
+  };
 
   // Init AudioContext on first user gesture (required by mobile browsers)
   const initAudioContext = () => {
@@ -112,12 +180,12 @@ export default function MusicPlayer() {
   };
 
   const handleNext = () => {
-    setCurrentTrackIndex((prev) => (prev + 1) % PLAYLIST.length);
+    setCurrentTrackIndex((prev) => (prev + 1) % allTracks.length);
     setIsPlaying(true);
   };
 
   const handlePrevious = () => {
-    setCurrentTrackIndex((prev) => (prev - 1 + PLAYLIST.length) % PLAYLIST.length);
+    setCurrentTrackIndex((prev) => (prev - 1 + allTracks.length) % allTracks.length);
     setIsPlaying(true);
   };
 
@@ -220,13 +288,67 @@ export default function MusicPlayer() {
                     <p className="opacity-40 text-xs font-mono uppercase tracking-widest mt-1">{currentTrack.artist}</p>
                   </div>
                 </div>
-                <button 
-                  onClick={() => setIsMinimized(true)}
-                  className="p-2 hover:bg-white/5 rounded-full transition-colors opacity-40 hover:opacity-100"
-                >
-                  <ChevronDown size={20} />
-                </button>
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={() => setShowAddForm(!showAddForm)}
+                    className="p-2 hover:bg-white/5 rounded-full transition-colors opacity-40 hover:opacity-100"
+                    title="Add track"
+                  >
+                    <Plus size={18} />
+                  </button>
+                  <button 
+                    onClick={() => setIsMinimized(true)}
+                    className="p-2 hover:bg-white/5 rounded-full transition-colors opacity-40 hover:opacity-100"
+                  >
+                    <ChevronDown size={20} />
+                  </button>
+                </div>
               </div>
+
+              {/* Add track form */}
+              <AnimatePresence>
+                {showAddForm && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="overflow-hidden"
+                  >
+                    <div className="px-1 pb-2 space-y-2">
+                      <p className="text-[10px] font-mono uppercase tracking-widest opacity-40">Add direct audio URL (.mp3, .ogg)</p>
+                      <div className="flex gap-2">
+                        <input
+                          value={addUrl}
+                          onChange={e => setAddUrl(e.target.value)}
+                          placeholder="https://example.com/song.mp3"
+                          className="flex-1 bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs outline-none focus:border-romantic-blue/50 transition-colors placeholder:opacity-30"
+                          onKeyDown={e => e.key === 'Enter' && handleAddTrack()}
+                        />
+                        <button
+                          onClick={handleAddTrack}
+                          disabled={addLoading || !addUrl.trim()}
+                          className="px-3 py-2 rounded-xl bg-romantic-blue text-white text-xs font-bold disabled:opacity-40 hover:scale-105 transition-all"
+                        >
+                          {addLoading ? '...' : 'Add'}
+                        </button>
+                      </div>
+                      {/* Custom tracks list */}
+                      {customTracks.length > 0 && (
+                        <div className="space-y-1 pt-1">
+                          {customTracks.map((t, i) => (
+                            <div key={i} className="flex items-center justify-between px-2 py-1 rounded-lg hover:bg-white/5">
+                              <span className="text-xs opacity-60 truncate flex-1">{t.title}</span>
+                              <button onClick={() => handleRemoveCustomTrack(i)} className="text-red-400/50 hover:text-red-400 ml-2">
+                                <X size={12} />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
               <div className="space-y-6">
                 <div className="space-y-2">
