@@ -956,20 +956,17 @@ export default function MemoryVault() {
                 onClick={() => setSelected(item)}
               >
                 <div className="relative group cursor-pointer">
-                  <div className="absolute -top-12 left-1/2 -translate-x-1/2 bg-white rounded-lg p-1 shadow-xl scale-0 group-hover:scale-100 transition-transform origin-bottom z-50">
-                    <div className="w-24 h-24 rounded-md overflow-hidden">
-                      {item.type === 'image' ? (
-                        <img src={item.url} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
-                      ) : (
-                        <video src={item.url} className="w-full h-full object-cover" muted />
-                      )}
-                    </div>
-                    <p className="text-[10px] font-bold text-black mt-1 text-center truncate px-1">{item.location?.name}</p>
+                  {/* Tooltip on hover */}
+                  <div className="absolute -top-14 left-1/2 -translate-x-1/2 bg-black/90 rounded-xl p-2 shadow-xl scale-0 group-hover:scale-100 transition-transform origin-bottom z-50 whitespace-nowrap">
+                    <p className="text-[10px] font-bold text-white">{item.location?.name || 'Memory'}</p>
                   </div>
-                  <div className="w-8 h-8 rounded-full bg-romantic-blue border-2 border-white shadow-lg flex items-center justify-center overflow-hidden">
-                    <img src={item.url} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
-                  </div>
-                  <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-romantic-blue rotate-45 border-r border-b border-white" />
+                  {/* SVG pin — no external image, no CSP issue */}
+                  <svg width="32" height="40" viewBox="0 0 32 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <ellipse cx="16" cy="37" rx="6" ry="3" fill="rgba(0,0,0,0.3)" />
+                    <path d="M16 0C9.373 0 4 5.373 4 12c0 9 12 25 12 25S28 21 28 12C28 5.373 22.627 0 16 0Z" fill="#3b82f6" />
+                    <circle cx="16" cy="12" r="6" fill="white" fillOpacity="0.9" />
+                    <path d="M16 9c-1.657 0-3 1.343-3 3s1.343 3 3 3 3-1.343 3-3-1.343-3-3-3Z" fill="#3b82f6" />
+                  </svg>
                 </div>
               </Marker>
             ))}

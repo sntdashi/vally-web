@@ -15,3 +15,4 @@ create policy "anon select push_subscriptions" on public.push_subscriptions for 
 create policy "anon insert push_subscriptions" on public.push_subscriptions for insert with check (true);
 create policy "anon update push_subscriptions" on public.push_subscriptions for update using (true);
 create policy "anon delete push_subscriptions" on public.push_subscriptions for delete using (true);
+crea2

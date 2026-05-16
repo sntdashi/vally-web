@@ -7,19 +7,19 @@ const PLAYLIST = [
     title: "Clair de Lune",
     artist: "Claude Debussy",
     source: "https://upload.wikimedia.org/wikipedia/commons/9/96/Clair_de_lune.ogg",
-    cover: "https://picsum.photos/seed/romantic1/200/200"
+    color: ["#3b82f6", "#8b5cf6"]
   },
   {
     title: "Gymnopédie No.1",
     artist: "Erik Satie",
     source: "https://upload.wikimedia.org/wikipedia/commons/e/e9/Gymnopedie_No1.ogg",
-    cover: "https://picsum.photos/seed/romantic2/200/200"
+    color: ["#06b6d4", "#3b82f6"]
   },
   {
     title: "Nocturne Op.9 No.2",
     artist: "Frédéric Chopin",
     source: "https://upload.wikimedia.org/wikipedia/commons/1/10/Chopin_Nocturne_op9_No2.ogg",
-    cover: "https://picsum.photos/seed/romantic3/200/200"
+    color: ["#8b5cf6", "#ec4899"]
   }
 ];
 
@@ -91,7 +91,7 @@ export default function MusicPlayer() {
       setAddLoading(false);
       return;
     }
-    const newTrack = { title, artist, source: src, cover: `https://picsum.photos/seed/${Date.now()}/200/200` };
+    const newTrack = { title, artist, source: src, color: ['#3b82f6', '#8b5cf6'] as [string, string] };
     const updated = [...customTracks, newTrack];
     setCustomTracks(updated);
     saveCustomPlaylist(updated);
@@ -273,12 +273,14 @@ export default function MusicPlayer() {
                         />
                       ))}
                     </div>
-                    <img
-                      src={currentTrack.cover}
-                      alt="Album Art"
-                      className={`relative z-10 w-full h-full object-cover transition-transform duration-1000 ${isPlaying ? 'scale-110 rotate-6' : ''}`}
-                      referrerPolicy="no-referrer"
-                    />
+                    <div
+                      className={`relative z-10 w-full h-full transition-transform duration-1000 ${isPlaying ? 'scale-110 rotate-6' : ''}`}
+                      style={{ background: `linear-gradient(135deg, ${(currentTrack as any).color?.[0] ?? '#3b82f6'}, ${(currentTrack as any).color?.[1] ?? '#8b5cf6'})` }}
+                    >
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <Music size={32} className="text-white opacity-40" />
+                      </div>
+                    </div>
                     <div className="absolute inset-0 z-20 bg-black/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                       <Music size={20} className={isPlaying ? "animate-bounce" : ""} />
                     </div>
@@ -446,12 +448,14 @@ export default function MusicPlayer() {
                     />
                   ))}
                 </div>
-                <img
-                  src={currentTrack.cover}
-                  alt="Album Art"
-                  className={`relative z-10 w-full h-full object-cover transition-transform duration-1000 ${isPlaying ? 'scale-110 rotate-12' : ''}`}
-                  referrerPolicy="no-referrer"
-                />
+                <div
+                  className={`relative z-10 w-full h-full transition-transform duration-1000 ${isPlaying ? 'scale-110 rotate-12' : ''}`}
+                  style={{ background: `linear-gradient(135deg, ${(currentTrack as any).color?.[0] ?? '#3b82f6'}, ${(currentTrack as any).color?.[1] ?? '#8b5cf6'})` }}
+                >
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <Music size={20} className="text-white opacity-40" />
+                  </div>
+                </div>
                 <div className="absolute inset-0 z-20 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                   <ChevronUp size={20} />
                 </div>
