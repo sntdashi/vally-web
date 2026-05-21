@@ -1,9 +1,41 @@
 import { motion, AnimatePresence } from "motion/react";
-import { Heart, Stars, Calendar, Music, MessageCircleHeart, Moon, Sun, Zap, X, BatteryLow, BatteryFull, Star } from "lucide-react";
+import { Heart, Stars, Calendar, Music, MessageCircleHeart, Moon, Sun, Zap, X, BatteryLow, BatteryFull, Star, Bell, BellOff } from "lucide-react";
 import { useState } from "react";
 import { usePerformance } from "../hooks/usePerformance";
 import NotificationSettings from "./NotificationSettings";
 import { PresencePill } from "./PresenceIndicator";
+import { usePushNotifications } from "../hooks/usePushNotifications";
+
+function NotificationBell() {
+  const { isSubscribed, status, subscribe, unsubscribe } = usePushNotifications();
+  const [loading, setLoading] = useState(false);
+
+  const handleClick = async () => {
+    setLoading(true);
+    if (isSubscribed) await unsubscribe();
+    else await subscribe();
+    setLoading(false);
+  };
+
+  if (status === 'unsupported') return null;
+
+  return (
+    <button
+      onClick={handleClick}
+      disabled={loading || status === 'denied'}
+      title={
+        status === 'denied' ? 'Notifications blocked — enable in browser settings' :
+        isSubscribed ? 'Notif ON — click to disable' :
+        'Enable partner notifications'
+      }
+      className={`p-1.5 rounded-xl hover:bg-white/10 transition-all ${
+        isSubscribed ? 'text-green-400' : 'opacity-30 hover:opacity-70'
+      }`}
+    >
+      {isSubscribed ? <Bell size={18} /> : <BellOff size={18} />}
+    </button>
+  );
+}
 
 interface NavbarProps {
   onThemeToggle: () => void;
@@ -70,6 +102,9 @@ export default function Navbar({ onThemeToggle, isDark }: NavbarProps) {
           <button onClick={onThemeToggle} className="p-1.5 rounded-xl hover:bg-white/10 transition-colors text-romantic-cyan opacity-60 hover:opacity-100">
             {isDark ? <Sun size={18} /> : <Moon size={18} />}
           </button>
+          <div className="w-px h-5 bg-white/10 mx-1" />
+          {/* Notification bell — desktop */}
+          <NotificationBell />
         </div>
 
         {/* Presence pill — top right, desktop only */}
