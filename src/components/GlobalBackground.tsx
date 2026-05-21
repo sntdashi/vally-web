@@ -1125,6 +1125,7 @@ export default function GlobalBackground() {
   const [showOrbits, setShowOrbits] = useState(false);
   const [timeSpeed, setTimeSpeed] = useState(1);
   const [showSettings, setShowSettings] = useState(false);
+  // Hide solar system settings UI — accessible via triple-click on logo if needed
   const [selectedPlanet, setSelectedPlanet] = useState<PlanetData | null>(null);
   const [hoveredPlanet, setHoveredPlanet] = useState<PlanetData | null>(null);
   const { primary } = useThemeColors();
@@ -1335,13 +1336,7 @@ export default function GlobalBackground() {
           )}
         </AnimatePresence>
 
-        <button
-          onClick={() => setShowSettings(!showSettings)}
-          className={`p-4 rounded-full glass transition-all shadow-2xl border-romantic-cyan/20 ${showSettings ? 'bg-romantic-cyan text-black' : 'text-romantic-cyan hover:bg-white/10'}`}
-          title="Background Settings"
-        >
-          <Settings size={24} className={showSettings ? "animate-spin-slow" : ""} />
-        </button>
+        {/* Settings button hidden — solar system settings not needed in production */}
       </div>
     </>
   );
