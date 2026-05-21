@@ -3,6 +3,7 @@ import React, { useState, useRef, ChangeEvent, useEffect } from "react";
 import { X, Maximize2, Plus, ZoomIn, ZoomOut, RotateCcw, Loader2, Image as ImageIcon, Play, CheckCircle2, Music, Volume2, VolumeX, Film, Scissors, Save, Trash2, Share2, Link, Twitter, Send, Copy, Check, Download, Map as MapIcon, LayoutGrid, MapPin, Upload, GripVertical } from "lucide-react";
 import { Map, Marker, ZoomControl } from "pigeon-maps";
 import { fetchMemories, uploadMemory, deleteMemories, updateMemory, reorderMemories, subscribeToMemories, type Memory } from "../lib/memories";
+import { supabase } from "../lib/supabase";
 
 // Use Memory type from lib/memories
 type MemoryItem = Memory;
@@ -439,6 +440,7 @@ function DeleteConfirmationModal({ count, onConfirm, onCancel }: { count: number
 export default function MemoryVault() {
   const [memories, setMemories] = useState<MemoryItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [timelineEvents, setTimelineEvents] = useState<Array<{id: string; title: string; image_url: string | null; lat: number | null; lng: number | null; location_name: string | null}>>([]);
   const [uploadingFiles, setUploadingFiles] = useState<UploadingFile[]>([]);
   const [selected, setSelected] = useState<MemoryItem | null>(null);
   const [scale, setScale] = useState(1);
@@ -464,10 +466,14 @@ export default function MemoryVault() {
       setLoading(false);
     }).catch(() => setLoading(false));
 
+    // Also fetch timeline events for the map
+    supabase.from('timeline_events').select('id, title, image_url, lat, lng, location_name')
+      .not('lat', 'is', null)
+      .then(({ data }) => setTimelineEvents(data || []));
+
     const unsub = subscribeToMemories(() => {
       fetchMemories().then(setMemories);
     });
-    // Wrap in sync function — unsubscribe() returns a Promise but useEffect cleanup must be sync
     return () => { unsub(); };
   }, []);
 
@@ -956,11 +962,9 @@ export default function MemoryVault() {
                 onClick={() => setSelected(item)}
               >
                 <div className="relative group cursor-pointer">
-                  {/* Tooltip on hover */}
                   <div className="absolute -top-14 left-1/2 -translate-x-1/2 bg-black/90 rounded-xl p-2 shadow-xl scale-0 group-hover:scale-100 transition-transform origin-bottom z-50 whitespace-nowrap">
                     <p className="text-[10px] font-bold text-white">{item.location?.name || 'Memory'}</p>
                   </div>
-                  {/* SVG pin — no external image, no CSP issue */}
                   <svg width="32" height="40" viewBox="0 0 32 40" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <ellipse cx="16" cy="37" rx="6" ry="3" fill="rgba(0,0,0,0.3)" />
                     <path d="M16 0C9.373 0 4 5.373 4 12c0 9 12 25 12 25S28 21 28 12C28 5.373 22.627 0 16 0Z" fill="#3b82f6" />
@@ -970,10 +974,48 @@ export default function MemoryVault() {
                 </div>
               </Marker>
             ))}
+
+            {/* Timeline events on map */}
+            {timelineEvents.map((event) => (
+              <Marker
+                key={`tl-${event.id}`}
+                width={50}
+                anchor={[event.lat!, event.lng!]}
+              >
+                <div className="relative group cursor-pointer">
+                  <div className="absolute -top-20 left-1/2 -translate-x-1/2 scale-0 group-hover:scale-100 transition-transform origin-bottom z-50">
+                    <div className="bg-black/90 rounded-xl p-2 shadow-xl whitespace-nowrap">
+                      {event.image_url && (
+                        <img src={event.image_url} className="w-20 h-14 object-cover rounded-lg mb-1" referrerPolicy="no-referrer" />
+                      )}
+                      <p className="text-[10px] font-bold text-white text-center">{event.title}</p>
+                      {event.location_name && <p className="text-[9px] text-white/50 text-center">{event.location_name}</p>}
+                    </div>
+                  </div>
+                  {/* Pink/magenta pin for timeline events */}
+                  <svg width="32" height="40" viewBox="0 0 32 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <ellipse cx="16" cy="37" rx="6" ry="3" fill="rgba(0,0,0,0.3)" />
+                    <path d="M16 0C9.373 0 4 5.373 4 12c0 9 12 25 12 25S28 21 28 12C28 5.373 22.627 0 16 0Z" fill="#ec4899" />
+                    <circle cx="16" cy="12" r="6" fill="white" fillOpacity="0.9" />
+                    <path d="M13 12c0-1.657 1.343-3 3-3s3 1.343 3 3-1.343 3-3 3-3-1.343-3-3Z" fill="#ec4899" />
+                  </svg>
+                </div>
+              </Marker>
+            ))}
           </Map>
           <div className="absolute top-8 left-8 glass p-4 rounded-2xl z-10">
             <h3 className="text-lg font-serif font-bold">Global Memories</h3>
             <p className="text-xs opacity-40">Exploring our journey across the world.</p>
+            <div className="flex items-center gap-3 mt-2">
+              <div className="flex items-center gap-1.5">
+                <svg width="10" height="12" viewBox="0 0 32 40"><path d="M16 0C9.373 0 4 5.373 4 12c0 9 12 25 12 25S28 21 28 12C28 5.373 22.627 0 16 0Z" fill="#3b82f6"/></svg>
+                <span className="text-[10px] opacity-40">Photos</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <svg width="10" height="12" viewBox="0 0 32 40"><path d="M16 0C9.373 0 4 5.373 4 12c0 9 12 25 12 25S28 21 28 12C28 5.373 22.627 0 16 0Z" fill="#ec4899"/></svg>
+                <span className="text-[10px] opacity-40">Moments</span>
+              </div>
+            </div>
           </div>
         </motion.div>
       )}

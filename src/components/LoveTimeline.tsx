@@ -12,6 +12,9 @@ interface TimelineEvent {
   image_url: string | null;
   storage_path: string | null;
   sort_order: number;
+  lat: number | null;
+  lng: number | null;
+  location_name: string | null;
 }
 
 const ICON_MAP: Record<string, React.ReactNode> = {
@@ -106,7 +109,14 @@ function TimelineItem({
               <div className="p-2 rounded-xl bg-romantic-blue/10">
                 {ICON_MAP[event.icon_type] || ICON_MAP.heart}
               </div>
-              <h3 className="text-lg md:text-xl font-serif font-bold">{event.title}</h3>
+              <div>
+                <h3 className="text-lg md:text-xl font-serif font-bold">{event.title}</h3>
+                {event.location_name && (
+                  <p className="text-[10px] font-mono opacity-40 flex items-center gap-1 mt-0.5">
+                    <MapPin size={10} /> {event.location_name}
+                  </p>
+                )}
+              </div>
             </div>
             <p className="opacity-60 text-sm leading-relaxed">{event.description}</p>
           </div>
@@ -140,6 +150,9 @@ function EventForm({
   const [iconType, setIconType] = useState(initial?.icon_type || 'heart');
   const [imageUrl, setImageUrl] = useState(initial?.image_url || '');
   const [storagePath, setStoragePath] = useState(initial?.storage_path || '');
+  const [locationName, setLocationName] = useState(initial?.location_name || '');
+  const [lat, setLat] = useState(initial?.lat?.toString() || '');
+  const [lng, setLng] = useState(initial?.lng?.toString() || '');
   const [uploading, setUploading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -216,10 +229,33 @@ function EventForm({
         </div>
       </div>
 
+      {/* Location */}
+      <div>
+        <label className="text-[10px] font-mono uppercase tracking-widest opacity-40 block mb-1">Location (optional — shows on map)</label>
+        <input value={locationName} onChange={e => setLocationName(e.target.value)}
+          placeholder="e.g. Bandung, Indonesia"
+          className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm outline-none focus:border-romantic-blue/50 mb-2" />
+        <div className="grid grid-cols-2 gap-2">
+          <input value={lat} onChange={e => setLat(e.target.value)}
+            placeholder="Latitude (e.g. -6.89)"
+            className="bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm outline-none focus:border-romantic-blue/50" />
+          <input value={lng} onChange={e => setLng(e.target.value)}
+            placeholder="Longitude (e.g. 107.61)"
+            className="bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm outline-none focus:border-romantic-blue/50" />
+        </div>
+        <p className="text-[9px] opacity-30 mt-1">Tip: cari di Google Maps → klik lokasi → copy koordinatnya</p>
+      </div>
+
       <div className="flex gap-2 justify-end">
         <button onClick={onCancel} className="px-4 py-2 rounded-xl glass text-sm opacity-60 hover:opacity-100">Cancel</button>
         <button
-          onClick={() => onSave({ date_label: dateLabel, title, description: desc, icon_type: iconType, image_url: imageUrl || null, storage_path: storagePath || null })}
+          onClick={() => onSave({
+            date_label: dateLabel, title, description: desc, icon_type: iconType,
+            image_url: imageUrl || null, storage_path: storagePath || null,
+            lat: lat ? parseFloat(lat) : null,
+            lng: lng ? parseFloat(lng) : null,
+            location_name: locationName || null,
+          })}
           disabled={!title || !dateLabel}
           className="px-5 py-2 rounded-xl bg-romantic-blue text-white text-sm font-bold flex items-center gap-2 disabled:opacity-40"
         >
