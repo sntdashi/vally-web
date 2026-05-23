@@ -49,7 +49,7 @@ export default function ChatPage() {
   const inputRef = useRef<HTMLInputElement>(null);
   const myId = getMyId();
   const myName = getMyName();
-  const { partnerOnline, onlineUsers } = usePresence();
+  const { partnerOnline, onlineUsers, partnerPage } = usePresence();
 
   const partner = onlineUsers.find(u => u.userId !== myId);
 
@@ -115,7 +115,7 @@ export default function ChatPage() {
             {partner?.name || JSON.parse(localStorage.getItem('vally_config') || '{}')?.names?.person2 || 'Your love'}
           </p>
           <p className={`text-[10px] font-mono ${partnerOnline ? 'text-green-400' : 'opacity-30'}`}>
-            {partnerOnline ? `Online · ${partner?.page || 'chat'}` : 'Offline'}
+            {partnerOnline ? `Online · ${partnerPage || 'chat'}` : 'Offline'}
           </p>
         </div>
       </div>

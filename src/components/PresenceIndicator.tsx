@@ -23,11 +23,9 @@ const PAGE_LABELS: Record<string, string> = {
 
 // Inline pill for Navbar — compact, no floating
 export function PresencePill() {
-  const { partnerOnline, onlineUsers } = usePresence();
+  const { partnerOnline, partnerPage, onlineUsers } = usePresence();
   const [partnerName] = useState(getPartnerName);
-  const myId = localStorage.getItem('vally_user_id') || '';
-  const partner = onlineUsers.find(u => u.userId !== myId);
-  const pageLabel = partner?.page ? (PAGE_LABELS[partner.page] || partner.page) : null;
+  const pageLabel = partnerPage ? (PAGE_LABELS[partnerPage] || partnerPage) : null;
 
   return (
     <motion.div
