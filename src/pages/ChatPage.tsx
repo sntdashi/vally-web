@@ -121,7 +121,8 @@ export default function ChatPage() {
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-1">
+      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-1"
+        style={{ background: 'rgba(4,5,15,0.6)' }}>
         {messages.length === 0 && (
           <div className="flex flex-col items-center justify-center h-full opacity-30 gap-4">
             <Heart size={40} className="text-romantic-blue" />
@@ -165,10 +166,13 @@ export default function ChatPage() {
                     )}
                     <div className={`px-4 py-2.5 rounded-[18px] text-sm leading-relaxed ${
                       isMe
-                        ? 'bg-romantic-blue text-white rounded-br-md'
-                        : 'bg-white/8 border border-white/10 rounded-bl-md backdrop-blur-sm'
+                        ? 'text-white rounded-br-md'
+                        : 'rounded-bl-md text-white/90'
                     }`}
-                    style={isMe ? { background: 'linear-gradient(135deg, #3b82f6, #06b6d4)' } : {}}>
+                    style={isMe
+                      ? { background: 'linear-gradient(135deg, #3b82f6, #06b6d4)' }
+                      : { background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.12)', backdropFilter: 'blur(10px)' }
+                    }>
                       {msg.content}
                     </div>
                     <span className="text-[9px] font-mono opacity-20 mx-1">{timeStr(msg.created_at)}</span>
