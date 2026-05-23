@@ -94,8 +94,12 @@ export default function ThemeCustomizer() {
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.95 }}
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 z-[70] w-12 h-12 rounded-2xl flex items-center justify-center shadow-2xl"
-        style={{ background: `linear-gradient(135deg, ${primary}, ${secondary})` }}
+        className="fixed z-[70] w-12 h-12 rounded-2xl flex items-center justify-center shadow-2xl"
+        style={{
+          background: `linear-gradient(135deg, ${primary}, ${secondary})`,
+          bottom: 'calc(env(safe-area-inset-bottom, 0px) + 80px)',
+          right: '16px',
+        }}
       >
         <Settings size={20} className="text-white" />
       </motion.button>
@@ -117,8 +121,12 @@ export default function ThemeCustomizer() {
               animate={{ opacity: 1, x: 0, scale: 1 }}
               exit={{ opacity: 0, x: 50, scale: 0.95 }}
               transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              className="fixed right-4 bottom-20 z-[90] w-[320px] max-h-[80vh] flex flex-col rounded-3xl border border-white/10 overflow-hidden"
-              style={{ background: 'rgba(8, 8, 20, 0.97)', backdropFilter: 'blur(30px)' }}
+              className="fixed right-4 z-[90] w-[320px] max-h-[70vh] flex flex-col rounded-3xl border border-white/10 overflow-hidden"
+              style={{
+                bottom: 'calc(env(safe-area-inset-bottom, 0px) + 140px)',
+                background: 'rgba(8, 8, 20, 0.97)',
+                backdropFilter: 'blur(30px)'
+              }}
             >
               {/* Header */}
               <div className="flex items-center justify-between px-5 py-4 border-b border-white/5">

@@ -229,7 +229,8 @@ export default function MusicPlayer() {
     <motion.div
       initial={{ x: -100, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
-      className="fixed bottom-4 left-4 md:bottom-8 md:left-8 z-50"
+      className="fixed left-4 md:bottom-8 md:left-8 z-50 music-player-pos"
+      // md override via inline won't work for md breakpoint, handle with a class trick
     >
       <audio
         ref={audioRef}

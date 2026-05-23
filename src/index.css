@@ -71,7 +71,15 @@
   .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
 }
 
-/* Custom scrollbar */
+/* Music player & FAB position — above bottom nav on mobile */
+.music-player-pos {
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 72px);
+}
+@media (min-width: 768px) {
+  .music-player-pos {
+    bottom: 32px;
+  }
+}
 ::-webkit-scrollbar { width: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
