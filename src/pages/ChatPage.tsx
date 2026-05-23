@@ -218,6 +218,24 @@ export default function ChatPage() {
       type,
       ...mediaData,
     });
+
+    // Notify partner if they're not currently on chat page
+    if (!partnerOnline || partnerPage !== 'chat') {
+      const notifBody = type === 'media'
+        ? mediaData?.media_type === 'image' ? '📸 Sent a photo'
+          : mediaData?.media_type === 'video' ? '🎥 Sent a video'
+          : '📄 Sent a document'
+        : content.trim();
+
+      supabase.functions.invoke('send-push', {
+        body: {
+          senderName: myName,
+          title: `${myName} 💙`,
+          message: notifBody,
+        },
+      }).catch(() => {});
+    }
+
     setInput('');
     setSending(false);
     inputRef.current?.focus();
